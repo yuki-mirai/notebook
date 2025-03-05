@@ -1,0 +1,87 @@
+= 角色属性
+
+可以使用 `role` 属性为块和大多数的内联元素分配一个或多个角色。`role` 是一个具名属性，
+它的值可以包含多个由空格分隔的角色，也可以使用简写形式（以点为前缀）来定义角色。
+
+角色可以：
+
+* 为元素添加额外的语义
+* 可用于向一组元素添加额外样式（通过 CSS 类选择器实现）
+* 可能被转换器识别并激活某些行为
+
+NOTE: AsciiDoc 中的 `role` 属性始终映射为 HTML 中的 `class` 属性，因此只要指定了 `role` 属性，我们就可以在 CSS 中自定义元素样式。
+
+== 为区块分配角色
+
+为区块分配角色有两种语法：简写点（`.`）语法和全写（`role=`）语法。
+
+=== 简写语法
+
+简写语法要在块的属性列表中的 `style` 位置添加一个以 `.` 开头的值：
+
+[,asciidoc]
+----
+[.rolename]
+****
+This is a sidebar with a role assigned to it, rolename.
+****
+----
+
+也支持同时分配多个角色：
+
+[,asciidoc]
+----
+[.role1.role2]
+****
+This is a sidebar with two roles assigned to it, role1 and role2.
+****
+----
+
+采用简写语法，角色值会被转换成以空格分隔的值列表（`role1 role2`）。
+
+=== 全写语法
+
+全写语法采用具名属性形式定义，使用全写语法时可以将属性放在样式属性之后的任意位置：
+
+[,asciidoc]
+----
+[role=rolename]
+****
+This is a sidebar with one role assigned to it, rolename.
+****
+----
+
+如果要定义多个角色，需要用空格将值分隔，且因为存在空格，最好是用引号将值括起来，虽然这并不是强制的：
+
+[,asciidoc]
+----
+[role="role1 role2"]
+****
+This is a sidebar with two roles assigned to it, role1 and role2.
+****
+----
+
+使用全写语法，角色属性的值不会进行额外的处理，因为已经跟输出格式中的形式保持一致了。
+
+这种语法也能用于内联宏，但不能用于格式化文本。
+
+== 为格式化内联元素分配角色
+
+我们可以给格式化内联元素（如：粗体 `*` ，斜体 `_` 和等宽体 ```）分配角色，但是只能使用简写语法：
+
+[,asciidoc]
+----
+This sentence contains [.application]*bold inline content* that's assigned a role.
+
+This sentence contains [.varname]`monospace text` that's assigned a role.
+----
+
+上述示例输出的 HTML 源码如下：
+
+[,html]
+----
+<p>This sentence contains <strong class="application">bold inline content</strong> that&#8217;s assigned a role.</p>
+
+<p>This sentence contains <code class="varname">monospace text</code> that&#8217;s assigned a role.</p>
+</div>
+----
