@@ -1,0 +1,196 @@
+= ID 属性
+
+可以使用 ID 属性为块或内联元素分配唯一标识符。`id` 是一个具名属性，在同一文档中必须保证唯一性。
+
+ID 可以：
+
+* 为元素提供内部链接或交叉引用锚点
+* 用于向特定元素添加额外样式（如：通过 CSS ID 选择器）
+
+可以使用简写语法（`#`），也可以用全写形式（`id=`）或锚点语法（`[[]]`）在内联元素旁边添加锚点。可以在单元格开头使用锚点语法为表格单元格分配 ID，同样也可以用锚点为列表项分配 ID。
+
+== 有效的 ID
+
+当使用具名 `id` 属性的方式定义 ID时，AsciiDoc 不限制可用于 ID 的字符集，只要求值不为空；当使用简写哈希语法或锚点语法定义 ID 时，可用于 ID 的字符会受到一些限制（如：不能使用空格）。
+
+NOTE: 注意虽然 AsciiDoc 对 ID 的命名限制可能比较宽松，但是还是要谨慎命名，因为 ID 会被输出到最终格式文件中（如：XML），这些格式可能有比较严格的限制。
+
+为了确保 ID 的可移植性，最好遵循 XML 规范，即：名称的第一个字符必须是字母、冒号或下划线，后续字符必须是字母、冒号、下划线、连字符、句点或数字。不应在 ID 中使用任何空格。最好也避免以数字开头，且尽可能使用小写字母，以解决不区分大小写平台的可移植性问题。
+
+遵循上述标准，以下是一些合法的 ID：
+
+----
+install
+data-structures
+error-handling
+subject-and-body
+unset_an_attribute
+----
+
+以下是无效 ID：
+
+----
+install the gem
+3 blind mice
+-about-the-author
+----
+
+== 使用 ID 作为锚点
+
+ID 可以作为锚点使用，锚点几乎可以在文档中的任何位置定义，包括标题、段落、图像和分隔块等。锚点的声明方式是将一个 ID 括在双方括号中（如：`+[[idname]]+`，或在属性列表开头使用简写的 ID 语法（例如：`+[#idname]+`），简写形式是首选语法。
+
+== 给块分配 ID
+
+可以使用简写哈希语法、具名语法或锚点语法为块分配 ID。
+
+使用简写语法给列表块分配 ID：
+
+[,asciidoc]
+----
+[#goals]
+* Goal 1
+* Goal 2
+----
+
+使用具名语法给列表块分配 ID：
+
+[,asciidoc]
+----
+[id=goals]
+* Goal 1
+* Goal 2
+----
+
+使用锚点语法给列表块分配 ID，要用双方括号将 ID 括起来：
+
+[,asciidoc]
+----
+[[goals]]
+* Goal 1
+* Goal 2
+----
+
+下面将一个开放块改为引用块，并为其分配一个 ID 和角色：
+
+[,asciidoc]
+-----
+[quote.movie#roads,Dr. Emmett Brown]
+____
+Roads? Where we're going, we don't need roads.
+____
+-----
+
+还可以在内容中的任何位置使用锚点语法定义一个内联锚点：
+
+[,asciidoc]
+----
+[[bookmark-a]]Inline anchors make arbitrary content referenceable.
+----
+
+或者使用简写 ID 语法定义内联锚点：
+
+[,asciidoc]
+----
+[#bookmark-b]#Inline anchors can be applied to a phrase like this one.#
+----
+
+TIP: 简写语法中的 ID 和角色值的顺序无关紧要。
+
+CAUTION: 如果 ID 中包含 `.`，则必须使用全写的具名赋值形式（如：`id=classname.propertyname`）或锚点语法（如：`+[[classname.propertyname]]+`）来定义。
+
+== 给内联元素分配 ID
+
+ID 简写形式可用于内联引用文本元素：
+
+[,asciidoc]
+----
+[#free_the_world]#free the world#
+----
+
+在普通文本中可使用内联锚点语法分配 ID：
+
+[,asciidoc]
+----
+[[free_the_world]]free the world
+----
+
+== 给列表项分配 ID
+
+错误的列表项锚点 ID 分配方式：
+
+[,asciidoc]
+----
+[[anchor-point]]* list item with invalid anchor
+----
+
+正确的列表项锚点 ID 分配方式：
+
+[,asciidoc]
+----
+* First item
+* [[step2]]Second item
+* Third item
+----
+
+如果是描述列表，锚点必须放在术语的开头：
+
+[,asciidoc]
+----
+[[cpu,CPU]]Central Processing Unit (CPU)::
+The brain of the computer.
+
+[[hard-drive]]Hard drive::
+Permanent storage for operating system and/or user files.
+----
+
+可以向列表项或描述列表术语中添加多个锚点，但是只有第一个锚点被注册，其余的锚点是辅助性的，用于创建深层链接（可从 URL 片段访问）。
+
+== 给表格单元格分配 ID
+
+可以在表格单元格开始处放置一个内联锚点为单元格分配一个 ID。
+
+[,asciidoc]
+----
+|===
+|[[my_cell]]The table cell I want to jump to.
+|===
+----
+
+== 给内联图像分配 ID
+
+目前无法直接在内联图像上定义 ID，只能通过在图像旁边放置一个内联锚点达到类似的效果。
+
+[,asciidoc]
+----
+[[tiger-image]]image:tiger.png[Image of a tiger]
+----
+
+除了上述方式，还可以使用宏 `anchor` 实现相同的效果：
+
+[,asciidoc]
+----
+anchor:tiger-image[]image:tiger.png[Image of a tiger]
+----
+
+== 给章节添加额外锚点
+
+要向章节添加额外的锚点，需要将锚点放在标题前（不带任何空格）：
+
+[,asciidoc]
+----
+[#version-4_9]
+=== [[current]][[latest]]Version 4.9
+----
+
+== 自定义自动外部引用文本（`xreftext`）
+
+可以自定义交叉引用链接中使用的文本（`xreflabel`），如果未定义，处理器会尽力寻找合适的文本，如果是图像，将使用图像标题；如果是章节标题，将使用章节标题的文本。
+
+要定义 `xreflabel`，需要在定义锚点之后将其添加到 ID 之后（以逗号分隔）：
+
+[,asciidoc]
+----
+[[tiger-image,Image of a tiger]]
+.This image represents a Bengal tiger also called the Indian tiger
+image::tiger.png[]
+----
