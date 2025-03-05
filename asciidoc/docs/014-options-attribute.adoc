@@ -1,0 +1,106 @@
+= 选项属性
+
+`options` 属性（通常简写为 `opts` 属性）是一种多功能具名属性，可以分配一个或多个值。
+它可以定义为全局的文档属性，也可以定义为某个块元素的块属性。任何无法识别的选项都会被忽略。
+
+== 为块分配选项
+
+可以使用 `options` 属性的简写或全写语法给块分配一个或多个选项。
+
+=== 简写语法
+
+选项分配的简写语法是在 `style` 属性的位置定义一个以百分号 `%` 为前缀的值：
+
+[,asciidoc]
+----
+[%option]
+****
+This is a sidebar with an option assigned to it, named option.
+****
+----
+
+可以连续使用多个以 `%` 开头的值为块定义多个选项：
+
+[,asciidoc]
+----
+[%option1%option2]
+****
+This is a sidebar with two options assigned to it, named option1 and option2.
+****
+----
+
+这是一个使用简写语法给表格分配三个选项的示例：
+
+[,asciidoc]
+----
+[%header%footer%autowidth,cols=2*~]
+|===
+|Cell A1 |Cell B1
+
+|Cell A2 |Cell B2
+
+|Cell A3 |Cell B3
+|===
+----
+
+=== 全写语法
+
+明确设置属性名 `options` 或 `opts`，后面紧跟等号 `=`，最后是属性值，这种语法称为全写语法：
+
+[,asciidoc]
+----
+[opts=option]
+****
+This is a sidebar with an option assigned to it, named option.
+****
+----
+
+如果有多个选项需要设置，可以使用逗号 `,` 对选项值进行分隔：
+
+[,asciidoc]
+----
+[opts="option1,option2"]
+****
+This is a sidebar with two options assigned to it, option1 and option2.
+****
+----
+
+接下来重新使用全写语法定义表格中的三个选项值（即 `header`、`footer` 和 `autowidth`）：
+
+[,asciidoc]
+----
+[cols=2*~,opts="header,footer,autowidth"]
+|===
+|Cell A1 |Cell B1
+
+|Cell A2 |Cell B2
+
+|Cell A3 |Cell B3
+|===
+----
+
+== 跟其它属性一起使用选项
+
+下面展示在简写语法和全写语法中，选项属性跟其它属性一起使用时分别怎样定义，其中 `horizontal` 是样式，`properties` 是角色，`step` 是选项。
+
+简写语法 ::
+
+[,asciidoc]
+----
+[horizontal.properties%step]
+property 1:: does stuff
+property 2:: does different stuff
+----
+
+注意只有样式属性要求必须位于首位，角色属性和选项属性的声明顺序没有要求。
+
+全写语法 ::
+
+[,asciidoc]
+----
+[horizontal,role=properties,opts=step]
+property 1:: does stuff
+property 2:: does different stuff
+----
+
+与简写语法一样，除了样式属性必须是第一位，角色属性和选项属性位置无关紧要。
