@@ -1,0 +1,38 @@
+= 属性值换行
+
+有时文档属性的值会很长，超出了屏幕的观察范围，不易阅读，因此我们希望能对其进行换行。
+
+== 软换行
+
+软换行是指被换行的内容在视觉上被拆分到了多行，但是实际上经过 AsciiDoc 处理器处理后，这些行都会被连接到一行中。
+
+要将一行很长的属性值拆分到多行，同时还保证它们被当成一行内容来处理，可以在需要换行的文本处添加一个空格和反斜杠（\），可以将这两个字符的组合称为行延续符（Line continuation），它们的作用是将拆分到多行的内容连接起来，使它们看起来是多行，但实际被当成一行。除了最后一行，所有拆分后的行都需要这样处理。
+
+行延续符后面的行内容可以进行缩进，而缩进实际上不会被包含到最终的内容中。
+
+.假设我们定义了一个名为 `description` 的属性，它的属性值非常长，我们可以用这种方式对其软换行：
+[,asciidoc]
+----
+:description: If you have a very long line of text \
+that you need to substitute regularly in a document, \
+you may find it easier to split the value neatly in the header \
+so it remains readable to folks looking at the AsciiDoc source.
+----
+
+如果行延续符缺失，处理器会将第一行的内容作为属性的值，剩下的行不会被认为是属性值。
+
+== 硬换行
+
+硬换行跟软换行最大的不同就是硬换行会保留换行符，也就是内容经过处理器处理后，依然保持换行效果，不会都合并到一行中。
+
+有时我们希望被拆分到多行的内容保持换行符，让我们的内容不会都挤到一行中，就需要使用硬换行。
+
+硬换行是在换行处插入一个空格和一个加号（+），跟软换行唯一的区别就是反斜杠换成了加号。
+
+.硬换行的属性值示例：
+[,asciidoc]
+----
+:haiku: Write your docs in text, + \
+AsciiDoc makes it easy, + \
+Now get back to work!
+----
