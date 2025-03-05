@@ -1,0 +1,103 @@
+= 引用文档属性
+
+通过用一对大括号 `{}` 将将文档中定义的属性名包裹起来（即：`{name-of-attribute}`），可以在文档中的多个位置引用属性，ASciiDoc 处理器在处理属性引用时，会用对应属性的值来替换引用。
+
+NOTE: 有时我们希望阻止这种替换行为，可以通过在引用前面添加一个前导反斜杠实现（即：`\\{name-of-attribute}`）。
+
+== 引用自定义属性
+
+在引用自定义属性之前，必须要先定义属性。
+
+下面是在文档头中定义的两个属性：
+
+[,asciidoc]
+----
+= Ops Manual
+:disclaimer: Don't pet the wild Wolpertingers. We're not responsible for any loss of hair, chocolate, or purple socks.
+:url-repo: https://github.com/asciidoctor/asciidoctor
+----
+
+接下来在文档体中引用这两个属性：
+
+[,asciidoc]
+----
+Asciidoctor is {url-repo}[open source].
+
+WARNING: {disclaimer}
+If you're missing a lime colored sock, file a ticket in
+the {url-repo}/issues[Asciidoctor issue tracker].
+(Actually, please don't).
+----
+
+== 引用内建属性
+
+内建属性的引用方式跟自定义属性的引用方式是一样的，但跟自定义属性不同的是，内建属性由 ASciiDoc 处理器设置，不需要在引用前由用户设置。
+
+== 转义属性引用
+
+有时候我们的内容中难免会出现一些跟属性引用一样的东西，但是事实上并不是属性引用。比如，一个 URL 路径中的可替换片段同样也是一个变量名包含在一对大括号中（如：`/items/{id}`），我们希望这段文本被原样显示，而不是执行属性替换，AsciiDoc 提供了几种方法来转义属性引用。
+
+=== 反斜杠转义
+
+通过在属性引用前面添加一个前导反斜杠可以将属性引用转义，处理器在处理这种语法时，会将前导反斜杠移除，并将剩余的文本原样输出。
+
+[,asciidoc]
+----
+In the path /items/\{id}, id is a path parameter.
+----
+
+注意只有在大括号中是合法的属性名时，反斜杠才会被识别并移除，否则不会被移除。
+
+=== 包含在 Passthrough 中
+
+我们还可以在内联 Passthrough 中将属性引用转义：
+
+[,asciidoc]
+----
+In the path +/items/{id}+, id is a path parameter.
+----
+
+内联 Passthrough 中的所有文本都不会被处理，直接原样输出。
+
+=== 其它转义机制
+
+可以通过控制属性替换来阻止属性引用被替换。
+
+== 处理未解析的引用
+
+当对一个尚未定义的属性进行引用时，处理器不会执行引用替换，而是直接将属性引用原样输出。同时，如果我们在一行非空文本行中使用内联语法将某个属性取消设置，则处理器会将一整行的内容丢弃。可以使用 `attribute-missing` 和 `attribute-undefined` 属性来定制这些行为。
+
+=== 属性缺失的处理
+
+`attribute-missing` 属性控制对缺失的属性如何处理，默认情况下如果引用的属性缺失，属性引用会被原样输出。
+
+这个属性有四个候选值：
+
+skip :: 将属性引用原样输出（默认设置）
+
+drop :: 丢弃引用，但不是一整行内容都丢弃
+
+drop-line :: 丢弃出现属性引用的一整行内容
+
+warn :: 如果有属性缺失，则打印警告信息
+
+=== 强制失败
+
+如果我们希望在文档中出现缺失属性时处理器能报告失败，可以设置 `attribute-missing` 为 `warn`，并在 CLI 中传递 `--failure-levle=WARN` 选项：
+
+[,bash]
+----
+asciidoctor -a attribute-missing=warn --failure-level=WARN doc.adoc
+----
+
+=== 未定义属性的处理
+
+`attribute-undefined` 属性控制一个表达式中包含将一个属性定义取消设置时该怎样被处理。默认情况下包含这种表达式的行将被删除。
+
+这个属性有两种值：
+
+drop :: 在处理之后使用空字符串将表达式替换
+
+drop-line :: 直接丢弃包含表达式的一整行，而不只是表达式本身（默认）
+
+NOTE: 推荐将这种表达式放在单独一行，不要跟其他内容在同一行。
