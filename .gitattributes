@@ -1,0 +1,18 @@
+*         text eol=lf
+*.adoc    text eol=lf
+*.bash    text eol=lf
+*.sh      text eol=lf
+*.bat     text eol=crlf
+
+# These file extensions are binary
+*.bin     binary
+*.a       binary
+*.jpg     binary
+*.jpeg    binary
+*.png     binary
+*.ico     binary
+*.gif     binary
+*.ttf     binary
+*.mp3     binary
+*.mp4     binary
+*.flv     binary
