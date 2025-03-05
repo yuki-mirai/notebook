@@ -1,0 +1,488 @@
+= AsciiDoc 中的块元素
+
+块元素是一个 AsciiDoc 文档中的主要结构，文档本身也是一个块元素。
+
+块元素是离散的，面向行的内容块。一旦被解析，内容块会变成被解析的文档模型中的一个块元素。
+一个块可能会包含其它的块，所以说块是可以嵌套的。
+
+转化器会按文档中的顺序逐个访问每个块，将其转化成对应的输出块。
+
+== 块的边界
+
+块的边界定义方式各不相同，一些块的边界是隐式的，而另一些块的边界需要用分隔符显式标记。
+
+一个块（包括它的元数据行）应始终以空行或文档边界为界。一个块是否支持嵌套其它的块取决于块的内容模型，以及语法上是否允许。
+
+== 内容模型
+
+块的内容模型决定了块可以有什么类型的内容，以及其内容应该怎么处理。块的内容模型类型有：
+
+compound ::
+这种类型的块可以包含其它的块（如：section）。
+
+simple ::
+被视为段落文本的连续行的块，并会被正常替换（如：paragraph）。
+
+verbatim ::
+持有逐字文本的块，可以逐字替换（如：listing block）。
+
+raw ::
+持有不需要替换，直接输出的内容的块（如：passthrough block）。
+
+empty ::
+没有内容的块（如：image block）。
+
+table ::
+为表格保留的特殊的内容模型。
+
+对于所有内建的语法，内容模型会自动推断（由上下文决定），但可以为自定义的块配置。块在不同的情况下也支持不同的内容模型，取决于上下文和样式，并且在分割块的情况下，还有结构容器。
+
+== 上下文
+
+块可以通过名称来引用，块的名称就是块的上下文。
+
+[,asciidoc]
+----
+== Section Title
+
+Content of section.
+----
+
+上述示例中块的上下文就是 `section`。每个块都有上下文，上下文经常隐含在语法中，某些情况下我们也可以显式声明。
+通过上下文我们可以区分不同类型的块，可以认为上下文就是块的类型。
+
+有时会将上下文成为块名称，尤其是在谈论自定义的块时。块名称仅仅是另一层抽象，所有的内建的块名称都会映射到一个确切的上下文，
+但是块扩展可以映射一个块名称到一个或多个上下文。最终哪个上下文会被使用取决于扩展的处理方法返回的是哪个，最终，上下文会决定块应该怎样转化。
+
+上下文经常决定内容模型，如，所有的 `section` 会隐式地有一个 `compound` 内容模型，因为 `section` 可能只会包含其它的块；
+所有的文本块（literal block）都隐式地有一个 `verbatim` 内容模型，因为这种块的意图是演示逐字输出。
+
+[NOTE]
+内联元素也有自己的上下文，但是目前这些上下文还不能从解析后的文档模型中访问。
+
+== 转化器与上下文的关系
+
+转化器会使用上下文转发到转化方法，然后转化器会将样式应用到同类型的块中。
+
+转化器处理方法跟上下文是一一映射的，但是 `list_item` 和 `table_cell` 上下文除外，它们没有映射到一个处理器方法，在转化器中，这些块必须从它们的父块中访问。
+
+== 块的样式
+
+上下文并不能描述某些块的所有信息，因此需要块样式。某些块的属性列表（如：`[source]`，`[verse]`）中第一个名称用于声明块样式。
+
+下面是一个源码块示例：
+
+....
+[source,ruby]
+----
+puts "Hello, World!"
+----
+....
+
+源码块的上下文是 `listing`（由块分隔符推断出），样式是 `source`。
+
+== 块的共性
+
+块使用一些面向行的形式来定义，章节块由一个章节标题开始，分隔块由一对闭合的分隔符行定义，段落块则必须是连续的行。
+
+所有的块都可以有零行或多行直接堆叠在块顶部的元数据行。这些上提供了块属性，如 ID，标题和选项。
+这些元数据行可以表示如下信息：
+
+* 零行或多行块属性
+* 一个可选的锚点行
+* 一个可选地块标题行
+* 一个可选的 ID
+* 一个可选的角色集合
+* 一个可选的选项集合
+
+下面是一个带有标题和 ID 的侧栏块：
+[,asciidoc]
+----
+.Styles of music
+[#music-styles]
+****
+Go off on a tangent to describe what a style of music is.
+****
+----
+
+在处理内容时，块会被分割到不同的组，这些组主要与块的内容模型关联。
+
+段落块和逐字块有一个隐式的且可修改的替换。替换不适用于组合块，即，可以包含嵌套块的块。
+
+== 分隔块
+
+分隔块是由一对闭合的分隔符包裹的内容区域。分隔块可以被用于包含其它的块（如，多段落），
+或者设置内容的内容模型（如，逐字块），分隔块是所有块类型的子集。
+
+分隔块由结构容器定义，结构容器有一个起始的分隔符和一个闭合的分隔符。起始分隔符紧随着块的元数据（如果有的话）。
+
+结构容器中，前导和尾随的空行并不重要，如果有的话它们会被自动移除，剩下的行才是块的内容。
+
+这些分隔符行不仅仅定义了块的内容边界，还暗示了内容模型。
+
+=== 行分隔符
+
+行分隔符被用来定义分隔块，起始分隔符和闭合分隔符必须完全匹配，包括使用的字符与字符长度。在分隔符行包裹的区域为内容区，可以输入任何字符和空行，在起始分隔行的上面，还可以定义块的元数据。
+
+这是一个分隔块示例：
+[,asciidoc]
+----
+====
+This is an  example of an example block.
+That's so meta.
+====
+----
+
+一般分隔符的长度不能小于 4 个字符（开放块除外，它固定为 2 个字符长度）。
+
+=== 结构容器
+
+结构容器是一组固定的由 AsciiDoc 定义的可识别的块封装，它们提供了一个在 AsciiDoc 语法中可重用的构建块。通过评估结构容器和块的元数据，处理器会决定要构建什么类型的块。
+
+每个结构容器有个期望的内容模型，对于内建的块，就是决定内容模型的块的上下文。
+大多数的内置块都遵从期望的内容模型，自定义块则能指定内容模型。
+
+一些结构容器能重复用于不同的意图，如，引用块（`quote block`）的结构容器能被用于诗句块（`verse block`）。
+
+.AsciiDoc 中的结构容器
+|===
+|类型     |默认上下文       |内容模型  |最短分隔符
+|comment  |n/a             |n/a      |////
+|example  |:example        |compound |====
+|listing  |:listing        |verbatim |----
+|literal  |:literal        |verbatim |....
+|open     |:open           |compound |--
+|sidebar  |:sidebar        |coupound |pass:[****]
+|table    |:table          |table    |\|=== +
+                                       ,=== +
+                                       :=== +
+                                       !===
+|pass     |:pass           |raw      |pass:[++++]
+|quote    |:quote          |coupound |----
+|===
+
+源码块（source block）不是一个容器类型，而是 listing 或 literal 容器的特化，诗句块和警告块分别是 quote 和 example 容器的特化。而表格是一种特殊的结构容器，不属于自定义块。
+
+当没有显式的块样式存在时，会假设块为默认的上下文。
+
+[NOTE]
+注释块（comment block）并不会被保留到解析后的文档中，因此它没有上下文或内容模型。
+
+[TIP]
+当创建自定义块的时候，选择一个提供正确内容模型的结构容器很重要，这能让编辑器在扩展没有加载的情况下也能进行一个合理的处理。
+
+结构容器被用于定义分隔块，它提供了一个默认的上下文和期望的内容模型，但真实的上下文和内容模型还会根据块上的元数据来确定。
+
+== 嵌套块
+
+通过使用分隔块，我们可以将一个块嵌入另一个块中，但是父级块的内容模型必须是组合（`compound`），组合意味着块的内容是一个或多个块的序列。
+
+当内嵌块使用跟父级块不同的结构容器时，只需确保子块完整包含在父级块内部即可。分隔块之间禁止交叉嵌套。
+
+[,asciidoc]
+....
+====
+Here's a sample AsciiDoc document:
+
+----
+= Document Title
+Author Name
+
+Content goes here.
+----
+
+The document header is useful, but not required.
+====
+....
+
+当内嵌一个与父级块相同结构容器的分隔块的时候，需要使用不同的分割块长度（子块的分隔符长度可以比父级块长或短）：
+
+[,asciidoc]
+----
+====
+Here are your options:
+
+.Red Pill
+[%collapsible]
+======
+Escape into the real world.
+======
+
+.Blue Pill
+[%collapsible]
+======
+Live within the simulated reality without want or fear.
+======
+====
+----
+
+== 内建块概览
+
+.内建块
+|===
+|块                  |块名称        |分隔符     |意图       |替换
+
+|Paragraph           
+|n/a          
+|n/a        
+|常规段落    
+|Normal
+
+|Literal paragraph   
+|n/a          
+|n/a        
+|用于字面内容（预格式化的文本）的特殊类型的段落。必须从文档左边距缩进至少一个空格，常用于不包含空行的字面分隔块的简写。 
+|Verbatim
+
+|Admonition          
+|<LABEL>      
+|====       
+|特殊提示，通常有标签或图标       
+|Normal
+
+|Comment             
+|n/a          
+|////       
+|提供文档注释，注释的内容不会被输出到最终文档     
+|None
+
+|Example             
+|[example]    
+|====       
+|提供示例内容或定义警告块         
+|Normal
+
+|Fenced              
+|n/a          
+|\```        
+|源码或键盘输入按原样显示，如果文档开启了语法高亮那么也会对内容进行着色  
+|Verbatim
+
+|Listing             
+|[listing]    
+|----       
+|源码或键盘输入按原样显示         
+|Verbatim
+
+|Literal             
+|[literal]    
+|....       
+|输出文本完全按照输入时显示       
+|Verbatim
+
+|Open                
+|多数块名称    
+|--         
+|匿名块可以扮演除了直通块或表格之外的任何块  
+|Varies
+
+|Passthrough         
+|[pass]       
+|pass:[++++]
+|内容不处理，直接输出             
+|None
+
+|Quote               
+|[quote]      
+|----       
+|带可选属性的引用                
+|Normal
+
+|Sidebar             
+|[sidebar]    
+|\****       
+|显示在文档流之外的文本和内容     
+|Normal
+
+|Source              
+|[source]     
+|----       
+|原样输出的源码或键盘输入，如果文档开启了源码高亮并且源码语言设置的话会进行着色  
+|Verbatim
+
+|Stem                
+|[stem]       
+|\\++++  
+|不处理内容，直接发给解释器（如 AsciiMath 或 LaTeX）处理  
+|None
+
+|Table               
+|n/a          
+|+++===+++        
+|展示表格内容                     
+|Varies
+
+|Verse               
+|[verse]      
+|----       
+|带有可选属性的诗句                
+|Normal
+|===
+
+== 给块添加一个标题
+
+=== 块标题语法
+
+块标题直接定义在块属性列表、起始分隔符或者块内容的上方，标题行必须以一个点（.）开始，并直接跟上标题文本（注意 . 和第一个字符之间不能有空格），且标题必须独占一行，不能换行。
+
+.带标题的块
+....
+.This is the title of a sidebar block
+****
+This is the content of the sidebar block.
+****
+....
+
+==== 给分隔块添加标题
+
+任何分隔块都可以有标题，如果块有属性列表，则将标题加在属性列表的上方，否则直接将标题添加在分隔符上方。
+
+.给没有属性列表的分隔块添加标题：
+[,asciidoc]
+----
+.Terminal Output
+....
+From github.com:asciidoctor/asciidoctor
+ * branch        main   -> FETCH_HEAD
+Already up to date.
+....
+----
+
+.给带有属性列表的分割块添加标题：
+-----
+.Specify GitLab CI stages
+[source,yaml]
+----
+image: node:16-buster
+stages: [ init, verify, deploy ]
+----
+-----
+
+==== 给普通块添加标题
+
+如果只是一个普通的块，不是分隔块，则块的标题可以直接添加到内容之上：
+[,asciidoc]
+----
+.Mint
+[sidebar]
+Mint has visions of global conquest.
+If you don't plant it in a container, it will take over your garden.
+----
+
+== 题注（Captioned title）
+题注是一个标题前缀，跟标题之间用点（.）分隔，形如：`Example.Block that supports captionend title`。有些块上下文可以支持题注，仅当对应的题注属性被设置的时候题注才会展示。
+
+.支持题注的块以及转化器用于生成和控制它们的属性
+|===
+|块上下文       |Caption 属性       |计数器属性
+|appendix      |appendix-caption   |appendix-number
+|example       |example-caption    |example-number
+|image         |figure-caption     |figure-number
+|listing,source |listing-caption   |listing-number
+|table         |table-caption      |table-number
+|===
+
+除了 `listing` 和 `source` 块，以上所有的 caption 属性都默认设置了，数字按顺序自动生成并存储到对应的计数器属性中。
+
+.带题注的块
+[,asciidoc]
+----
+.Block that supports captioned title
+[number=3]
+====
+Block content
+====
+----
+
+== 给块分配一个 ID
+
+可以使用属性列表给任何块分配一个 ID，之后你可以通过该 ID 在其它地方引用该块。
+
+=== 块 ID 语法
+
+块 ID 是属性列表中的一个以井号开头的值
+[,asciidoc]
+----
+[#the-id-of-this-block]
+====
+Content of delimited example block
+====
+----
+
+如果块的属性列表中有样式属性，那么样式属性总是第一个，ID 直接跟在样式属性后面，不需要用逗号分隔两者。
+
+[,asciidoc]
+----
+[quote#roads]
+Roads? Where we're going, we don't need roads.
+----
+
+== 块伪装
+
+块样式可以被用于修改段落和大多数结构容器的上下文，也就是将一种块伪成另一种块，这称为块伪装。
+
+当段落上下文被用块样式修改的时候，块依然保留简单的内容模型，当修改结构容器的上下文的时候，只会保留预期内容模型的上下文。
+
+如果块声明的块样式和上下文名称匹配，则块的上下文的值会被设置为声明的值，且已经解析的块样式保持未设置。如果声明的块样式不匹配上下文名称，则将特化上下文或者隐式设置并特化上下文。自定义块声明的块样式如何处理将取决于扩展。
+
+.这是一个使用块样式改变结构容器上下文的示例，它将一个字面块（Literal block）变为了一个列表块（listing block）：
+[,asciidoc]
+----
+[listing]
+....
+a > b
+....
+----
+
+虽然该结构容器的默认上下文是 `:literal`，但声明的块样式将其改成了 `:listing`，块的默认样式不会被设置。
+
+.也可以将一个段落改为侧栏：
+[,asciidoc]
+----
+[sidebar]
+This sidebar is short, so a styled paragraph will do.
+----
+
+.还可以将一个示例结构容器改为警告块：
+[,asciidoc]
+----
+[NOTE]
+====
+Remember the milk.
+====
+----
+
+.下面列出了允许修改上下文的结构容器，以及它们可以被修改成什么上下文：
+|===
+|类型         |默认上下文                     |可使用的上下文
+
+|example      
+|:example                      
+|admonition (NOTE, TIP, WARNING, CAUTION, or IMPORTANT)
+
+|listing      
+|:listing                      
+|literal
+
+|literal      
+|:literal                      
+|listing
+
+|open         
+|:open                         
+|abstract, admonition (NOTE, TIP, WARNING, CAUTION, or IMPORTANT), comment, example, literal, listing, partintro, pass, quote, sidebar, verse
+
+|pass         
+|:pass                         
+|stem,latexmath,asciimath
+
+|sidebar      
+|:sidebar                      
+|n/a
+
+|quote        
+|:quote                        
+|verse
+|===
+
+所有可以被应用到开放块的上下文同样也能被应用到段落中，段落还能应用 `normal` 样式，用于将字面段落转化为普通的段落。
