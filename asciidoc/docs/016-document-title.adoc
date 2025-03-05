@@ -1,0 +1,90 @@
+= 文档标题: 副标题
+
+文档标题通常位于文档的第一行，且是可选的。
+
+标题语法 ::
+
+文档标题使用单个等号 `=`，后跟空格，最后是标题文本来定义：
+
+[,asciidoc]
+----
+= The Intrepid Chronicles
+
+This adventure begins on a frigid morning.
+----
+
+== 文档类型和标题
+
+从技术上讲，文档标题是 0 级章节标题，`article` 和 `manpage` 文档类型只能有一个 0 级章节标题。
+
+`book` 文档类型允许多个 0 级章节标题。当文档类型为 `book` 时，文档头部的 0 级章节标题将作为文档的标题，文档正文中的后续 0 级章节标题将被当做章节标题。
+
+== 隐藏或显示文档标题
+
+装换为独立文档时，默认显示文档标题，可以使用 `showtitle` 属性控制是否显示文档标题，如果不想显示文档标题，可以在 CLI 或 API 用 `showtitle!` 取消设置 `showtitle` 属性。
+
+转换为嵌入式文档时，默认不显示文档标题，如果要显示标题，需要在 CLI 或 API 中设置 `showtitle` 属性。需要注意的是，文档作者和修订信息无法在嵌入式文档中。
+
+== 引用文档标题
+
+0 级章节标题会自动分配给文档属性 `doctitle`，可以在文档中任何位置引用 `doctitle` 属性：
+
+[,asciidoc]
+----
+= The Intrepid Chronicles
+
+{doctitle} begin on a frigid morning.
+----
+
+TIP: 还可以在文档头使用属性条目明确设置 `doctitle` 并分配值。
+
+== 标题属性
+
+文档标题的文本默认会用作 HTML `<title>` 元素和主 DocBook `<info>` 元素的值，我们可以在文档头设置 `title` 属性来覆盖此行为。
+
+== 副标题
+
+标题后可以带一个可选的副标题。
+
+=== 语法
+
+文档标题后可以跟着一个冒号和空格（`: `），最后再跟着一段副标题文本：
+
+[,asciidoc]
+----
+= Main Title: Subtitle
+----
+
+处理器会找到标题文本中最后一次出现的分隔符 `: `，以此来划分主标题和副标题：
+
+[,asciidoc]
+----
+= Main Title: Main Title Continued: Subtitle
+----
+
+=== 修改副标题分隔符
+
+可以在文档标题的上方指定 `separator` 属性来修改标题分隔符，会有额外的一个空格被追加到自定义的分隔符之后：
+
+[,asciidoc]
+----
+[separator=::]
+= Main Title:: Subtitle
+----
+
+文档标题的分隔符已经由 `:` 变为了 `+::+`。
+
+还可以在文档头使用文档属性 `title-separator` 来指定分隔符：
+
+[,asciidoc]
+----
+= Main Title:: Subtitle
+:title-separator: ::
+----
+
+这个属性也可以通过 CLI 指定：
+
+[,shell]
+----
+asciidoctor -a title-separator=:: document.adoc
+----
