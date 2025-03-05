@@ -1,0 +1,149 @@
+= 计数器
+
+计数器用于存储和显示临时的数字或拉丁字母序列。
+
+WARNING: 应尽量避免使用计数器，如果要使用，也应该将其使用范围限制在最基本的用例，如在列表或表格列中。
+不应用计数器来构建 ID 或引用文本，否则可能导致意外行为。
+
+== 基本语法
+
+计数器是作为专门的文档属性实现的，我们可以使用属性引用语法来声明和使用计数器，计数器属性名要以 `counter:` 为前缀（如：`{counter:name}`）。因为计数器也是属性，因此它的命名规则也与属性名称一致，且需要注意**计数器名称中的字母必须小写**。
+
+每次解析 `counter:` 属性引用时，计数器的值都会递增并显示。如果计数器的值是正数，则每次加 1，如果计数器的值是拉丁字母，则每次都移动到字母表中的下一个字母。
+
+要创建从 1 开始的序列，简单形式如下：
+
+[,asciidoc]
+----
+The salad calls for {counter:seq1}) apples, {counter:seq1}) oranges and {counter:seq1}) pears.
+----
+
+====
+输出如下：
+
+----
+The salad calls for 1) apples, 2) oranges and 3) pears.
+----
+====
+
+如果需要在标题中使用计数器，应该先定义一个属性，并在该属性值中使用属性引用语法引用计数器：
+
+[,asciidoc]
+----
+:seq1: {counter:seq1}
+== Section {seq1}
+
+The sequence in this section is {seq1}.
+
+:seq1: {counter:seq1}
+== Section {seq1}
+
+The sequence in this section is {seq1}.
+----
+
+====
+输出结果如下：
+
+----
+Section 1
+The sequence in this section is 1.
+
+Section 2
+The sequence in this section is 2.
+----
+====
+
+=== 增加计数器值而不显示
+
+如果只是要增加计数器的值而不显示它，可以使用 `counter2:` 前缀：
+
+[,asciidoc]
+----
+{counter2:seq1}
+----
+
+WARNING: `counter2` 属性所在的行将产生一个空行，需要注意这个副作用。
+
+=== 显示计数器值而不增加
+
+如果只需要显示计数器的值而不使它的值递增，则只要像普通属性引用一样引用它即可：
+
+[,asciidoc]
+----
+{counter2:pnum}This is paragraph {pnum}.
+----
+
+== 自定义计数器序列
+
+如果要创建字符序列或不是以 1 开始的数字序列计数器，只要在第一次引用计数器时指定起始值即可：
+
+[,asciidoc]
+----
+Dessert calls for {counter:seq1:A}) mangoes, {counter:seq1}) grapes and {counter:seq1}) cherries.
+----
+
+仅当计数器的起始值未设置时，指定的起始值才生效，一旦指定，后续无法再更改。比如，我们在第二次引用计数器时将初始值重新改为 1，但这并没有效果：
+
+[,asciidoc]
+----
+Dessert calls for {counter:seq1:A}) mangoes, {counter:seq1:1}) grapes and {counter:seq1}) cherries.
+----
+
+====
+可以看到计数器的起始值没有改变：
+
+----
+Dessert calls for A) mangoes, B) grapes and C) cherries.
+----
+====
+
+不过，也不是没有办法改变这一点，只要将该计数器属性取消设置后再次指定初始化值即可：
+
+[,asciidoc]
+----
+The salad calls for {counter:seq1:1}) apples, {counter:seq1}) oranges and {counter:seq1}) pears.
+
+:!seq1:
+Dessert calls for {counter:seq1:A}) mangoes, {counter:seq1}) grapes and {counter:seq1}) cherries.
+----
+
+====
+输出如下：
+
+----
+The salad calls for 1) apples, 2) oranges and 3) pears.
+
+Dessert calls for A) mangoes, B) grapes and C) cherries.
+----
+====
+
+在表格中使用计数器的示例：
+
+[,asciidoc]
+----
+.Parts{counter2:index:0}
+|===
+|Part Id |Description
+
+|PX-{counter:index}
+|Description of PX-{index}
+
+|PX-{counter:index}
+|Description of PX-{index}
+|===
+----
+
+====
+输出如下：
+
+.Parts{counter2:index:0}
+|===
+|Part Id |Description
+
+|PX-{counter:index}
+|Description of PX-{index}
+
+|PX-{counter:index}
+|Description of PX-{index}
+|===
+====
