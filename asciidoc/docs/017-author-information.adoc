@@ -1,0 +1,186 @@
+= 作者信息
+
+作者信息是可选的，可以将作者的所有信息全写在一行，也可以使用多个属性条目设置这些信息。
+
+== 相关属性介绍
+
+首先有必要了解下作者相关的一些属性，它们可用于指定作者的姓名和邮箱。
+
+=== 基本属性
+
+`author` 属性:: 
+该属性表示作者的全名，`firstname`，`middlename`，`lastname` 和 `authorinitials` 属性会自动从 `author` 属性值派生。
+当使用单独的一行进行隐式赋值时，全名最多可以有三个以空格分隔的名称。
+
+`email` 属性:: 
+该属性表示第一作者的电子邮件地址，如果使用单独的一行进行分配，则它被包含在一堆尖括号（`< >`）中。也可以使用 URL 代替电子邮件地址。
+
+=== 派生属性
+
+IMPORTANT: 这些属性的值由 `author` 属性自动派生而来，我们无法直接通过定义这些属性的值来声明作者，处理器不会将手动赋给它们的值识别为作者名字并显示在标题下方。
+也就是说，这些属性的值由处理器给它们赋予，无需我们手动设置，但是我们可以在文中引用它们。
+
+`firstname` 属性::
+作者名字，采用单行语法时，第一个以空格分隔的名字将自动分配给 `firstname`。
+
+`lastname` 属性::
+作者姓氏，采用单行语法时，从左往右以空格分隔的第三个值将被分配给 `lastname`。
+
+`middlename` 属性::
+作者中间名或首字母，从左往右以空格分隔的第二个值将被分配给 `middlename`。
+
+`authorinitials` 属性::
+`firstname`，`lastname` 和 `middlename` 属性值的第一个字符将被分配给 `authorinitials` 属性，该属性的值将由三个或更少的字符组成，取决于上述三个属性被设置了几个。
+
+== 基本语法
+
+作者信息声明有两种方式：
+
+* 在文档头使用文档属性语法声明
+* 在文档头以作者行语法声明
+
+=== 使用文档属性声明作者
+
+通过文档属性的形式声明作者，只会用到 `author` 和 `email` 属性：
+
+[,asciidoc]
+----
+= The Intrepid Chronicles
+:author: Kismet R. Lee
+:email: kismet@asciidoctor.org
+----
+
+=== 使用作者行声明作者
+
+作者行（Author line）直接位于文档标题的下方，它不使用属性的形式来定义，而是直接以特定的格式（以空格分隔不同的姓名部分和邮箱）定义。
+
+为了让处理器正确识别作者行，必须满足以下所有条件：
+
+* 文档头必须包含文档标题
+* 作者信息必须位于文档标题正下方的行
+* 作者行必须以作者姓名开头
+* 作者行中的内容必须按照特定的顺序排列，并用空格分隔
+
+使用作者行声明作者姓名和邮箱：
+
+[,asciidoc]
+----
+= Document Title
+firstname middlename lastname <email>
+----
+
+TIP: 作者的中间名和邮件地址是可选的。
+
+如果作者名字以字符引用（如 `+&#174;+`）结尾，可以通过添加尾随属性引用 `\{empty}` 来防止字符引用末尾的分号导致的歧义：
+
+[,asciidoc]
+----
+AsciiDoc&#174;{empty} WG; Another Author
+----
+
+另一种方案是将字符引用移到属性中，然后使用属性引用来插入：
+
+[,asciidoc]
+----
+:reg: &#174;
+AsciiDoc{reg} WG; Another Author
+----
+
+== 声明多个作者
+
+一个文档可能不止一个作者，AsciiDoc 允许定义多个作者。
+
+WARNING: 只有 HTML5 和 DocBook 转换器可以转换具有多位作者的文档。
+
+=== 使用文档属性声明多个作者
+
+多个作者和单个作者的声明使用的属性是类似的，唯一的区别在于需要在单个作者的属性名基础上追加 `_<n>` 来区分不同作者的信息。
+如，对于之前的 `author` 属性，需要变成 `author_<n>`，`firstname` 变成 `firstname_<n>`，以此类推。`n` 是从 1 开始的索引。
+
+使用文档属性声明多个作者：
+
+[,asciidoc]
+----
+= Document Title
+:author_1: Kismet R. Lee
+:email_1: kismet@asciidoctor.org
+:author_2: Pax Draeke
+:email_2: pax@asciidoctor.org
+----
+
+=== 使用作者行声明多个作者
+
+作者行也可以指定多位作者，使用分号分隔多个作者，注意分号 `;` 后面需要一个空格：
+
+[,asciidoc]
+----
+= The Intrepid Chronicles
+Kismet R. Lee <kismet@asciidoctor.org>; B. Steppenwolf; Pax Draeke <pax@asciidoctor.org>
+----
+
+== 复合作者姓名
+
+如果作者姓名的某个部分由多个单词构成，比如 `firstname` 对应的值是 Ann Marie 时，应该使用下划线将它们连接为一个整体，
+防止因为由空格分隔的值超过三个，处理器将起始部分到邮箱部分的所有内容作为作者的全名（不会包含由分号分隔的下一个作者的信息）。
+
+作者行中使用复合名称：
+
+[,asciidoc]
+----
+= Drum and Bass Breakbeats
+Ann_Marie Jenson; Tomás López_del_Toro
+----
+
+作者属性中使用复合名称：
+
+[,asciidoc]
+----
+= Quantum Networks
+:author: Mara_Moss Wirribi
+
+== About {author}
+
+{firstname} lives on the Bellarine Peninsula near Geelong, Australia.= Drum and Bass Breakbeats
+Ann_Marie Jenson; Tomás López_del_Toro
+----
+
+通过用下划线链接多个单词的方式，可以告诉处理器这几个单词并不是分别表示作者姓名中的不同部分，而是一个整体，共同表示姓名中的同一个部分。
+
+NOTE: 处理器处理时会用空格替换下划线，因此最终我们看到的姓名不会包含下划线，而是以空格分隔。
+
+== 引用作者属性
+
+引用作者属性就跟引用普通的文档属性一样简单：
+
+[,asciidoc]
+----
+= The Intrepid Chronicles
+:author: Kismet R. Lee
+:email: kismet@asciidoctor.org
+
+== About {author}
+
+You can contact {firstname} at {email}.
+
+P.S. Don't ask what the {middlename} stands for; it's a secret.
+{authorinitials}
+----
+
+如果文档中声明了多位作者，则只需要给属性名添加一个 `_<n>` 后缀即可引用到指定索引的作者信息（变量 n 是索引，从 1 开始）：
+
+[,asciidoc]
+----
+= The Intrepid Chronicles
+Kismet R. Lee <kismet@asciidoctor.org>; B. Steppenwolf; Pax Draeke <pax@asciidoctor.org>
+
+.About {author_2}
+Mr. {lastname_2} lives in the Rocky Mountains.
+
+.About {author_3}
+{firstname_3}, also known as {authorinitials_3}, loves to surf.
+
+.About {author}
+You can contact {firstname} at {email}.
+----
+
+NOTE: 引用第一位作者时属性名可以不加后缀 `_<n>`。
