@@ -1,0 +1,71 @@
+= 文档元数据
+
+文档元数据（Document metadata）用于文档描述、关键字和自定义信息，可以在文档头中定义。
+转换为 HTML 后，这些属性的值将与 HTML 文档中的 `<head>` 部分包含的元素对应。
+
+== 文档描述
+
+可以使用 `description` 属性定义文档描述，如果描述文本过长，可以用行延续符（每行末尾添加一个空格和一个反斜杠 `\`）将属性值分成多行。
+
+定义文档描述：
+
+[,asciidoc]
+----
+= The Intrepid Chronicles
+Kismet Lee; Lazarus Draeke
+:description: A story chronicling the inexplicable \
+hazards and unique challenges a team must vanquish \
+on their journey to finding an open source \
+project's true power.
+
+This journey begins on a bleary Monday morning.
+----
+
+转换为 HTML 后，文档描述被转化为 HTML 的 `<meta>` 元素：
+
+[,html]
+----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="generator" content="Asciidoctor 2.0.11">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="A story chronicling the inexplicable
+hazards and unique challenges a team must vanquish on their journey
+to finding an open source project's true power.">
+<title>The Intrepid Chronicles</title>
+<style>
+----
+
+== 关键词
+
+关键词 `keywords` 属性的值是一个逗号分隔的值列表，转换成 HTML 后对应 `<meta>` 元素：
+
+[,asciidoc]
+----
+= The Intrepid Chronicles
+Kismet Lee; Lazarus Draeke
+:keywords: team, obstacles, journey, victory
+
+This journey begins on a bleary Monday morning.
+----
+
+对应的 HTML 输出：
+
+[,html]
+----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="generator" content="Asciidoctor 2.0.11">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="keywords" content="team, obstacles, journey, victory">
+<title>The Intrepid Chronicles</title>
+<style>
+----
+
+== 自定义元数据、样式和功能
+
+可以使用 docinfo 文件将自定义的元数据、样式表和脚本添加到输出文档的头部。
