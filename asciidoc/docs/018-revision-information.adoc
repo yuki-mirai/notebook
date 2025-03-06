@@ -1,0 +1,146 @@
+= 文档修订信息
+
+文档的修订功能可以用来记录文档的修订历史，方便日后回溯文档的变更记录。
+
+文档的修订信息相关的属性有三个：`revnumber`、`revdate` 和 `revremark`，
+可以在文档头中使用修订行（Revision line）或属性条目（Attribute entries）给这三个属性分配值。
+
+== 修订相关属性
+
+`revnumber`::
+修订版本，如果使用修订行指定，版本必须至少包含一个数字，并且如果后面没有指定日期或备注，则必须以字母 v 开头（如：`v7.0.6`），
+但是在展示的时候，数字前面任何的字母或符号都会被删除（不显示）；如果使用属性条目设置 `revnumber`，则版本不必包含数字，其整个值都会被展示。
+
+`revdate`::
+修订日期，如果使用修订行设置日期，则必须用逗号将其与版本号分隔开（如：`7.8.1, 2025-10-10`）。日期可以包含字母、数字、符号和属性引用。
+
+`revremark`::
+修订备注，使用修订行设置备注时，必须用冒号（`:`）将备注与版本或日期分隔开。
+
+==  使用修订行
+
+修订行是文档头中作者行后面的一行，处理器会将行中的内容解析并自动分配给内置属性 `revnumber`，`revdate` 和 `revremark`。
+
+要使用修订行，必须满足以下所有条件：
+
+1. 文档头必须包含文档标题和作者行。
+2. 修订信息必须直接在作者行的正下方。
+3. 修订行必须以修订版本开头。
+4. 修订号必须至少包含一个数字，但数字不必是版本号中的第一个字符。
+5. 修订行中的值必须按照特定的顺序放置，并用正确的分隔符分隔。
+
+NOTE: 修订行中的日期和备注是可选的。
+
+修订行中的属性存在以下几种可能的组合：
+
+* `v7.5`：包含版本号时，版本号需要加 `v` 前缀。
+* `7.5, 1-29-2020`：同时包含版本和日期，需要用逗号分隔，此时版本中的 `v` 前缀是可选的。
+* `7.5: Change by yokura`：同时包含版本和备注，使用冒号分隔它们，此时版本的 `v` 前缀是可选的。
+* `7.5, 1-29-2020: Change by yokura`：同时包含版本、日期和备注，使用逗号将版本号和日期分隔；使用冒号将日期和备注分隔。版本的 `v` 前缀也是可选的。
+
+一个修订行示例：::
+
+[,asciidoc]
+----
+= The Intrepid Chronicles
+Kismet Lee
+2.9, October 31, 2021: Fall incarnation
+----
+
+默认情况下，修订信息和作者信息显示在同一行，修订号前面有 Version 前缀，这是处理器自动添加的，可以使用 `version-lable` 属性修改或关闭它。
+
+修订行中可以引用文档属性（如：`docdate`），版本号也可以以字母开头：
+
+[,asciidoc]
+----
+= The Intrepid Chronicles
+Kismet Lee
+LPR55, {docdate}: A Special ⚄ Edition
+----
+
+上述示例在显示的时候，版本号前缀 `LPR` 会被移除，因为修订行中版本号前面所有的字母和符号都会被删除，如果要显示它们的话，可以使用属性条目来声明。
+
+== 使用属性条目设置修订信息
+
+当发生以下某种情况时，应该使用属性条目设置修订信息：
+
+* 文档中没有作者行。
+* 文档中没有修订版本号。
+* 希望显示修订版本号的完整值（特殊的字符前缀不会被删除）。
+* 修订属性的值包含某些与修订行语法冲突的字符时。
+
+使用属性条目设置修订属性：
+
+[,asciidoc]
+----
+= The Intrepid Chronicles
+:revdate: April 4, 2022
+:revnumber: LPR55
+:revremark: The spring incarnation of {doctitle}
+----
+
+NOTE: 属性条目的顺序不会影响它们在文档中的显示顺序。
+
+== `version-label` 属性
+
+`version-label` 属性控制修订版本号之前显示的版本标签，默认情况下该属性的值是 `Version`，可以通过在文档头中覆盖默认值。
+
+为 `version-label` 属性分配新值：::
+
+[,asciidoc]
+----
+= The Intrepid Chronicles
+Kismet Lee
+v3: An icy winter incarnation
+:version-label: Edition
+----
+
+取消设置 `version-label`：::
+
+[,asciidoc]
+----
+= The Intrepid Chronicles
+Kismet Lee
+v3: An icy winter incarnation
+:!version-label:
+----
+
+== 引用修订属性
+
+可以在文档中引用修订属性，语法与普通文档属性引用一致。
+
+使用修订行设置修订属性并引用它们：::
+
+[,asciidoc]
+----
+= The Intrepid Chronicles
+Kismet Lee
+v8.3, July 29, 2025: Summertime!
+
+== Colophon
+
+[%hardbreaks]
+Revision number: {revnumber}
+Revision date: {revdate}
+Revision notes: {revremark}
+----
+
+NOTE: 修订版本号中的 `v` 前缀会被删除，要显示版本号完整值，必须使用属性条目设置 `revnumber` 的值。
+
+使用属性条目设置修订属性并引用它们：::
+
+[,asciidoc]
+----
+= The Intrepid Chronicles
+Kismet Lee
+:revnumber: v8.3
+:revdate: July 29, 2025
+:revremark: Summertime!
+
+== Colophon
+
+[%hardbreaks]
+Revision number: {revnumber}
+Revision date: {revdate}
+Revision notes: {revremark}
+----
