@@ -1,0 +1,36 @@
+= 文档类型
+
+文档类型（`doctype`）声明了期望的文档结构，AsciiDoc 定义了一组固定的文档类型，每种文档类型的文档结构都有细微差别。
+
+默认的文档类型是 `article`，它为其它的文档类型提供了基础结构。`book` 文档类型允许多个 0 级章节标题，
+`manpage` 文档类型提供了一个扩展的表头用于定义手册的标准元数据。`inline` 类型则适用于嵌入式场景。
+
+== AsciiDoc 中的文档类型
+
+`article`::
+默认类型，除非在制作书籍或帮助手册，否则保持默认即可。
+
+`book`::
+以 `article` 类型为基础，并额外添加了使用顶级标题作为章节标题的能力，包括附录、献词、序言、参考书目、词汇表、索引和版权页。
+
+`manpage`::
+用于为 Unix 和类 Unix 操作系统生成 roff 或 HTML 格式的帮助手册。
+
+`inline`::
+有时我们只想将输入的文本转换为内联元素，而不是包含在块元素中，此时可以使用此文档类型。
+
+== 内联文档类型
+
+对于 `inline` 文档类型，如果输入如下：
+
+[,asciidoc]
+----
+https://asciidoctor.org[AsciiDoc] is a _lightweight_ markup language...
+----
+
+则输出：
+
+[,html]
+----
+<a href="https://asciidoctor.org">AsciiDoc</a> is a <em>lightweight</em> markup language&#8230;
+----
